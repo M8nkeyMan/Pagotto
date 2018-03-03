@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">AM003_Receiver</string>
+    <string name="header">A Broadcast Receiver</string>
+    <string name="start">Start Countdown</string>
+
+    <string name="flag1">FLAG_ONE_SHOT</string>
+    <string name="flag2">FLAG_NO_CREATE</string>
+    <string name="flag3">FLAG_CANCEL_CURRENT</string>
+    <string name="flag4">FLAG_UPDATE_CURRENT</string>
+    <string name="flag5">FLAG_IMMUTABLE</string>
+</resources>
