@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "430700708885",
+    "firebase_url": "https://socialz-epag-m2018.firebaseio.com",
+    "project_id": "socialz-epag-m2018",
+    "storage_bucket": "socialz-epag-m2018.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:430700708885:android:3969e65a7f4704d0",
+        "android_client_info": {
+          "package_name": "com.pag.socialz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "430700708885-1iurjjffqgtgml20h4qlnrscbddgaqr4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pag.socialz",
+            "certificate_hash": "6fe4c7cec03e24672596d8d02795adb29b85271d"
+          }
+        },
+        {
+          "client_id": "430700708885-jg1d5q6kmknv2356cb60ij57gjvslao7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFL0Gt91it_CaqGkMQQemcvQp2K0-0rn4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "430700708885-jg1d5q6kmknv2356cb60ij57gjvslao7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

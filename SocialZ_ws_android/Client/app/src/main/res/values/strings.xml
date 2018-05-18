@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Client</string>
+    <string name="error">Server non raggiungibile</string>
+    <string name="settings">Impostazioni</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="editText_I_description">Indirizzo del server: </string>
+    <string name="editText_P_description">Porta del server: </string>
+    <string name="editText_I_hint">192.168.1.254</string>
+    <string name="editText_P_hint">:8080</string>
+    <string name="button_restart">Connetti</string>
+</resources>
