@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -13,6 +14,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.UploadTask;
 import com.pag.socialz.ApplicationHelper;
+import com.pag.socialz.Enums.ProfileStatus;
 import com.pag.socialz.Enums.UploadImagePrefix;
 import com.pag.socialz.Listeners.OnObjectChangedListener;
 import com.pag.socialz.Listeners.OnObjectExistListener;
@@ -102,6 +104,17 @@ public class ProfileManager extends FirebaseListenerManager {
 
     public void getProfileSingleValue(String id, final OnObjectChangedListener<Profile> listener){
         databaseManager.getProfileSingleValue(id, listener);
+    }
+
+    public ProfileStatus checkProfile(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user == null){
+            return ProfileStatus.NOT_AUTHORIZED;
+        }else if(!PreferencesUtil.isProfileCreated(context)){
+            return ProfileStatus.NO_PROFILE;
+        }else{
+            return ProfileStatus.PROFILE_CREATED;
+        }
     }
 }
 

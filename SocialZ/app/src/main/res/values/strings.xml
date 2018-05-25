@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SocialZ</string>
+    <string name="app_name" translatable="false">SocialZ</string>
     <string name="label_create_post_activity">Create post</string>
     <string name="label_post_detail_activity">Post detail</string>
     <string name="label_image_detail_activity">Image</string>
@@ -33,7 +33,7 @@
     <string name="error_fail_remove_post">Fail to remove post</string>
     <string name="message_post_was_removed">Post was removed</string>
     <string name="error_fail_update_post">Fail to update post</string>
-    <string name="error_post_was_removed">Post was removed</string>
+    <string name="error_post_was_removed" translatable="false">Post was removed</string>
     <string name="confirm_deletion_post">Delete this post?</string>
 
     <string name="comment_text_hint">Enter your comment…</string>
@@ -65,7 +65,6 @@
     <string name="text_login">Thank you for using our application! Please, sign in for continue your action.</string>
     <string name="error_authentication">Authentication failed.</string>
     <string name="error_google_play_services">Google Play Services error.</string>
-    <string name="button_login_with_facebook">Login with facebook</string>
     <string name="button_login_with_google">Login with google</string>
 
 
@@ -110,10 +109,10 @@
     <string name="complain_sent">Complain was sent successfully</string>
     <string name="now_time_range">now</string>
 
-    <string name="duration_minutes_shortest">%1$d m</string>
-    <string name="duration_hours_shortest">%1$d h</string>
-    <string name="duration_days_shortest">%1$d d</string>
-    <string name="duration_week_shortest">%1$d w</string>
+    <string name="duration_minutes_shortest" translatable="false">%1$d m</string>
+    <string name="duration_hours_shortest" translatable="false">%1$d h</string>
+    <string name="duration_days_shortest" translatable="false">%1$d d</string>
+    <string name="duration_week_shortest" translatable="false">%1$d w</string>
 
     <string name="post_image_transition_name" translatable="false">post_image_transition</string>
     <string name="post_author_image_transition_name" translatable="false">post_author_image_transition_name</string>

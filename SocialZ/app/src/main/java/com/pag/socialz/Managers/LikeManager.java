@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pag.socialz.Activities.BaseActivity;
+import com.pag.socialz.Activities.MainActivity;
 import com.pag.socialz.ApplicationHelper;
 import com.pag.socialz.Listeners.OnObjectExistListener;
 import com.pag.socialz.Models.Post;
@@ -125,8 +126,12 @@ public class LikeManager {
         }
     }
 
-    private void doHandleLikeClickAction(BaseActivity baseActivity, Post post){
-
+    private void showWarningMessage(BaseActivity baseActivity, int messageId){
+        if(baseActivity instanceof MainActivity){
+            //((MainActivity)baseActivity).showFloatButtonRelatedSnackBar(messageId);
+        }else{
+            baseActivity.showSnackBar(messageId);
+        }
     }
 
     public void likeClickActionLocal(Post post){
@@ -181,5 +186,10 @@ public class LikeManager {
                 }
             }
         });
+    }
+
+    public void initLike(boolean isLiked){
+        likesImageView.setImageResource(0); //TODO insert drawables for likes
+        this.isLiked = isLiked;
     }
 }

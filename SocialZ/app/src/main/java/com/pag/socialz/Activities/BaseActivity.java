@@ -2,10 +2,12 @@ package com.pag.socialz.Activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.pag.socialz.Enums.ProfileStatus;
+import com.pag.socialz.Models.Profile;
 import com.pag.socialz.R;
 
 public class BaseActivity extends AppCompatActivity {
@@ -83,5 +87,29 @@ public class BaseActivity extends AppCompatActivity {
             showWarningDialog(R.string.internet_connection_failed);
         }
         return  hasInternetConnection;
+    }
+
+    public void showSnackBar(View view,int messageId){
+        Snackbar snackbar = Snackbar.make(view, messageId,Snackbar.LENGTH_LONG);
+        snackbar.show();
+    }
+
+    public void showSnackBar(String message) {
+        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
+                message, Snackbar.LENGTH_LONG);
+        snackbar.show();
+    }
+
+    public void showSnackBar(int messageId) {
+        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
+                messageId, Snackbar.LENGTH_LONG);
+        snackbar.show();
+    }
+
+    public void doAuthorization(ProfileStatus status){
+        if(status.equals(ProfileStatus.NOT_AUTHORIZED) || status.equals(ProfileStatus.NO_PROFILE)){
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
     }
 }

@@ -672,19 +672,19 @@ public class DatabaseManager {
     //Images
 
     public Task<Void> removeImage(String imageTitle) {
-        StorageReference storageReference = storage.getReferenceFromUrl(String.valueOf(R.string.storage_link));
-        StorageReference desertReference = storageReference.child("images/" + imageTitle);
-        return desertReference.delete();
+        //StorageReference storageReference = storage.getReferenceFromUrl(String.valueOf(R.string.storage_link));
+        //StorageReference desertReference = storageReference.child("images/" + imageTitle);
+        return null;//desertReference.delete();
     }
 
     public UploadTask uploadImage(Uri uri, String imageTitle) {
-        StorageReference storageRef = storage.getReferenceFromUrl(context.getResources().getString(R.string.storage_link));
-        StorageReference riversRef = storageRef.child("images/" + imageTitle);
+        //StorageReference storageRef = storage.getReferenceFromUrl(context.getResources().getString(R.string.storage_link));
+        //StorageReference riversRef = storageRef.child("images/" + imageTitle);
         // Create file metadata including the content type
         StorageMetadata metadata = new StorageMetadata.Builder()
                 .setCacheControl("max-age=7776000, Expires=7776000, public, must-revalidate")
                 .build();
 
-        return riversRef.putFile(uri, metadata);
+        return null; //riversRef.putFile(uri, metadata);
     }
 }

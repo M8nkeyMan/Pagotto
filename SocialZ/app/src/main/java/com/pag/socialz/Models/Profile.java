@@ -12,6 +12,7 @@ import java.io.Serializable;
         private String email;
         private String photoUrl;
         private String registrationToken;
+        private long likesCount;
 
         public Profile() {
             // Default constructor required for calls to DataSnapshot.getValue(Profile.class)
@@ -59,5 +60,13 @@ import java.io.Serializable;
 
         public void setRegistrationToken(String registrationToken) {
             this.registrationToken = registrationToken;
+        }
+
+        public long getLikesCount(){
+            return likesCount;
+        }
+
+        public void setLikesCount(long likesCount){
+            this.likesCount = likesCount;
         }
 }

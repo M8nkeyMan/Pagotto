@@ -27,8 +27,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.BaseActivity">
-        </activity>
+        <activity android:name=".Activities.CreatePostActivity" />
+        <activity android:name=".Activities.ProfileActivity" />
+        <activity android:name=".Activities.LoginActivity" />
+        <activity android:name=".Activities.PostDetailsActivity" />
+        <activity android:name=".Activities.EditProfileActivity"></activity>
     </application>
 
 </manifest>
