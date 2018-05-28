@@ -117,7 +117,7 @@ public class DatabaseManager {
 
     public void removeRegistrationToken(String token, String userId) {
         DatabaseReference databaseReference = ApplicationHelper.getDatabaseManager().getDatabaseReference();
-        DatabaseReference tokenRef = databaseReference.child("progiles").child(userId).child("notificationTokens").child(token);
+        DatabaseReference tokenRef = databaseReference.child("profiles").child(userId).child("notificationTokens").child(token);
         Task<Void> task = tokenRef.removeValue();
         task.addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

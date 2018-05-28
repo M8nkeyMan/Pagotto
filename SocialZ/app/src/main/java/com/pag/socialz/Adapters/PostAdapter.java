@@ -42,7 +42,7 @@ public class PostAdapter extends BasePostAdapter{
                         notifyItemInserted(postList.size());
                         loadNext(lastLoadedItemCreatedDate - 1);
                     } else {
-                        //mainActivity.showFloatButtonRelatedSnackBar(R.string.internet_connection_failed);
+                        mainActivity.showFloatButtonRelatedSnackBar(R.string.internet_connection_failed);
                     }
                 }
             });

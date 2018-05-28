@@ -89,7 +89,7 @@ public class PostManager extends FirebaseListenerManager {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                    Uri downloadUrl = taskSnapshot.getUploadSessionUri();
                     LogUtil.logDebug(TAG, "successful upload image, image url: " + String.valueOf(downloadUrl));
 
                     post.setImagePath(String.valueOf(downloadUrl));

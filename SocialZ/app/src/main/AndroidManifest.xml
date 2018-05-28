@@ -20,7 +20,7 @@
         <activity
             android:name=".Activities.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,7 +31,9 @@
         <activity android:name=".Activities.ProfileActivity" />
         <activity android:name=".Activities.LoginActivity" />
         <activity android:name=".Activities.PostDetailsActivity" />
-        <activity android:name=".Activities.EditProfileActivity"></activity>
+        <activity android:name=".Activities.EditProfileActivity" />
+        <activity android:name=".Activities.ChatChooseActivity" />
+        <activity android:name=".Activities.ChatActivity"></activity>
     </application>
 
 </manifest>
