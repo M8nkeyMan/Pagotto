@@ -1,5 +1,5 @@
 <resources>
-    <string name="storage_link" translatable="false">gs://socialcomponents.appspot.com</string>
-    <string name="google_web_client_id" translatable="false">196433492167-vl2r7i9ciu3jr72oqpqh57l9716h85o4.apps.googleusercontent.com</string>
+    <string name="storage_link" translatable="false">gs://socialz-epag-m2018.appspot.com/</string>
+    <string name="google_web_client_id" translatable="false">430700708885-jg1d5q6kmknv2356cb60ij57gjvslao7.apps.googleusercontent.com</string>
     <string name="google_large_image_url_pattern" translatable="false">%1$s?sz=%2$d</string>
 </resources>

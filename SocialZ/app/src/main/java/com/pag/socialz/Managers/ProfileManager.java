@@ -46,7 +46,7 @@ public class ProfileManager extends FirebaseListenerManager {
         this.databaseManager = ApplicationHelper.getDatabaseManager();
     }
 
-    public void idProfileExisting(String id, final OnObjectExistListener<Profile> onObjectExistListener){
+    public void isProfileExisting(String id, final OnObjectExistListener<Profile> onObjectExistListener){
         DatabaseReference databaseReference = databaseManager.getDatabaseReference().child("profiles").child(id);
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -87,6 +87,7 @@ public class ProfileManager extends FirebaseListenerManager {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     if(task.isSuccessful()){
+                        //Uri testDownloadUrl = task.getResult().getMetadata()
                         Uri downloadUrl = task.getResult().getDownloadUrl();
                         LogUtil.logDebug(TAG,"caricamento completo, url: "+String.valueOf(downloadUrl));
                         profile.setPhotoUrl(downloadUrl.toString());

@@ -132,6 +132,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="gone"
+                    app:layoutManager="LinearLayoutManager"
                     tools:listitem="@layout/comment_list_item" />
 
                 <ProgressBar
@@ -152,7 +153,7 @@
 
             </RelativeLayout>
 
-            <com.rozdoum.socialcomponents.views.CircularImageView
+            <com.pag.socialz.CustomViews.CircularImageView
                 android:id="@+id/authorImageView"
                 android:layout_width="@dimen/post_author_image_side"
                 android:layout_height="@dimen/post_author_image_side"

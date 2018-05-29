@@ -3,7 +3,9 @@ package com.pag.socialz.Activities;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class ChatActivity extends AppCompatActivity {
+import com.pag.socialz.R;
+
+public class ChatActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -16,10 +16,12 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.pag.socialz.Constants;
 import com.pag.socialz.Managers.LogUtil;
 import com.pag.socialz.Managers.ValidationUtils;
 import com.pag.socialz.R;
 import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 
@@ -54,68 +56,15 @@ public abstract class ImagePickerActivity extends BaseActivity{
         super.onRestoreInstanceState(savedInstanceState);
     }
 
-    public void onSelectImageClick(View view){
-
-    }
-
-    protected void loadImageToImageView(){
-        if(imageUri == null) return;
-        Glide.with(this)
-                .load(imageUri)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .fitCenter()
-                .listener(new RequestListener<Uri, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, Uri model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, Uri model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        getProgressView().setVisibility(View.GONE);
-                        LogUtil.logDebug(TAG, "Glide success loading from: "+imageUri.getPath());
-                        return false;
-                    }
-                })
-                .into(getImageView());
-    }
-    protected boolean isImageFileValid(Uri imageUri) {
-        int message = R.string.error_general;
-        boolean result = false;
-
-        if (imageUri != null) {
-            if (ValidationUtils.isImage(imageUri, this)) {
-                File imageFile = new File(imageUri.getPath());
-                if (imageFile.length() > MAX_FILE_SIZE_BYTES) {
-                    message = R.string.error_bigger_file;
-                } else {
-                    result = true;
-                }
-            } else {
-                message = R.string.error_incorrect_file_type;
-            }
-        }
-
-        if (!result) {
-            showSnackBar(message);
-            getProgressView().setVisibility(View.GONE);
-        }
-
-        return result;
-    }
-
     @Override
     @SuppressLint("NewApi")
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // handle result of pick image chooser
         if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             Uri imageUri = CropImage.getPickImageResultUri(this, data);
-
             if (isImageFileValid(imageUri)) {
                 this.imageUri = imageUri;
             }
-
             // For API >= 23 we need to check specifically that we have permissions to read external storage.
             if (CropImage.isReadExternalStoragePermissionsRequired(this, imageUri)) {
                 // request permissions and handle the result in onRequestPermissionsResult()
@@ -149,4 +98,87 @@ public abstract class ImagePickerActivity extends BaseActivity{
         }
     }
 
+    public void onSelectImageClick(View view){
+        if (CropImage.isExplicitCameraPermissionRequired(this)) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, CropImage.CAMERA_CAPTURE_PERMISSIONS_REQUEST_CODE);
+        } else {
+            CropImage.startPickImageActivity(this);
+        }
+    }
+
+    protected void loadImageToImageView(){
+        if(imageUri == null) return;
+        Glide.with(this)
+                .load(imageUri)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .fitCenter()
+                .listener(new RequestListener<Uri, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, Uri model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, Uri model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        getProgressView().setVisibility(View.GONE);
+                        LogUtil.logDebug(TAG, "Glide success loading from: "+imageUri.getPath());
+                        return false;
+                    }
+                })
+                .into(getImageView());
+    }
+
+    protected boolean isImageFileValid(Uri imageUri) {
+        int message = R.string.error_general;
+        boolean result = false;
+
+        if (imageUri != null) {
+            if (ValidationUtils.isImage(imageUri, this)) {
+                File imageFile = new File(imageUri.getPath());
+                if (imageFile.length() > MAX_FILE_SIZE_BYTES) {
+                    message = R.string.error_bigger_file;
+                } else {
+                    result = true;
+                }
+            } else {
+                message = R.string.error_incorrect_file_type;
+            }
+        }
+
+        if (!result) {
+            showSnackBar(message);
+            getProgressView().setVisibility(View.GONE);
+        }
+
+        return result;
+    }
+
+    protected void handleCropImageResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                if (ValidationUtils.checkImageMinSize(result.getCropRect())) {
+                    imageUri = result.getUri();
+                    int i = 0;
+                    loadImageToImageView();
+                } else {
+                    showSnackBar(R.string.error_smaller_image);
+                }
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                LogUtil.logError(TAG, "crop image error", result.getError());
+                showSnackBar(R.string.error_fail_crop_image);
+            }
+        }
+    }
+
+    protected void startCropImageActivity() {
+        if (imageUri == null) return;
+        CropImage.activity(imageUri)
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setFixAspectRatio(true)
+                .setMinCropResultSize(Constants.Profile.MIN_AVATAR_SIZE, Constants.Profile.MIN_AVATAR_SIZE)
+                .setRequestedSize(Constants.Profile.MAX_AVATAR_SIZE, Constants.Profile.MAX_AVATAR_SIZE)
+                .start(this);
+    }
 }

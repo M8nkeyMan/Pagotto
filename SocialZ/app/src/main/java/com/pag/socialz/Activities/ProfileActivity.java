@@ -5,6 +5,7 @@ import com.pag.socialz.Enums.PostStatus;
 import com.pag.socialz.Listeners.OnObjectChangedListener;
 import com.pag.socialz.Listeners.OnObjectExistListener;
 import com.pag.socialz.Managers.LogUtil;
+import com.pag.socialz.Managers.LogoutManager;
 import com.pag.socialz.Managers.PostManager;
 import com.pag.socialz.Managers.ProfileManager;
 import com.pag.socialz.Models.Post;
@@ -45,7 +46,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class ProfileActivity extends BaseActivity {
+public class ProfileActivity extends BaseActivity implements GoogleApiClient.OnConnectionFailedListener{
 
     private static final String TAG = ProfileActivity.class.getSimpleName();
     public static final int CREATE_POST_FROM_PROFILE_REQUEST = 22;
@@ -161,7 +162,7 @@ public class ProfileActivity extends BaseActivity {
     private void loadPostsList() {
         if (recyclerView == null) {
 
-            recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+            recyclerView = findViewById(R.id.recycler_view);
             postsAdapter = new PostsByUserAdapter(this, userID);
             postsAdapter.setCallback(new PostsByUserAdapter.CallBack() {
                 @Override
@@ -248,7 +249,7 @@ public class ProfileActivity extends BaseActivity {
                         .load(profile.getPhotoUrl())
                         .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                         .crossFade()
-                        //.error(R.drawable.ic_stub)
+                        .error(R.drawable.ic_stub)
                         .listener(new RequestListener<String, GlideDrawable>() {
                             @Override
                             public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
@@ -322,7 +323,7 @@ public class ProfileActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         if (userID.equals(currentUserId)) {
             MenuInflater inflater = getMenuInflater();
-            //inflater.inflate(R.menu.profile_menu, menu);
+            inflater.inflate(R.menu.profile_menu, menu);
             return true;
         }
 
@@ -331,13 +332,12 @@ public class ProfileActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
         switch (item.getItemId()) {
             case R.id.editProfile:
                 startEditProfileActivity();
                 return true;
             case R.id.signOut:
-                LogoutHelper.signOut(mGoogleApiClient, this);
+                LogoutManager.signOut(mGoogleApiClient, this);
                 startMainActivity();
                 return true;
             case R.id.createPost:

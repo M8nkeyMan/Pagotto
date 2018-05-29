@@ -21,6 +21,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 
 import com.google.firebase.storage.StorageMetadata;
@@ -62,7 +63,7 @@ public class DatabaseManager {
     private Map<ValueEventListener, DatabaseReference> activeListeners = new HashMap<>();
 
     public static DatabaseManager getInstance(Context context) {
-        if (instance != null) {
+        if (instance == null) {
             instance = new DatabaseManager(context);
         }
         return instance;
@@ -72,11 +73,13 @@ public class DatabaseManager {
         this.context = context;
         this.firebaseAuth = FirebaseAuth.getInstance();
     }
-
     public void init() {
         database = FirebaseDatabase.getInstance();
         database.setPersistenceEnabled(true);
         storage = FirebaseStorage.getInstance();
+
+//        Sets the maximum time to retry upload operations if a failure occurs.
+        storage.setMaxUploadRetryTimeMillis(Constants.Database.MAX_UPLOAD_RETRY_MILLIS);
     }
 
     public DatabaseReference getDatabaseReference() {
@@ -99,10 +102,41 @@ public class DatabaseManager {
             DatabaseReference reference = activeListeners.get(listener);
             reference.removeEventListener(listener);
         }
+
         activeListeners.clear();
     }
 
-    //Registration tokens
+    public void createOrUpdateProfile(final Profile profile, final OnProfileCreatedListener onProfileCreatedListener) {
+        DatabaseReference databaseReference = ApplicationHelper.getDatabaseManager().getDatabaseReference();
+        Task<Void> task = databaseReference.child("profiles").child(profile.getId()).setValue(profile);
+        task.addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                onProfileCreatedListener.onProfileCreated(task.isSuccessful());
+                addRegistrationToken(FirebaseInstanceId.getInstance().getToken(), profile.getId());
+                LogUtil.logDebug(TAG, "createOrUpdateProfile, success: " + task.isSuccessful());
+            }
+        });
+    }
+
+    public void updateRegistrationToken(final String token) {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            final String currentUserId = firebaseUser.getUid();
+
+            getProfileSingleValue(currentUserId, new OnObjectChangedListener<Profile>() {
+                @Override
+                public void onObjectChanged(Profile obj) {
+                    if(obj != null) {
+                        addRegistrationToken(token, currentUserId);
+                    } else {
+                        LogUtil.logError(TAG, "updateRegistrationToken",
+                                new RuntimeException("Profile is not found"));
+                    }
+                }
+            });
+        }
+    }
 
     public void addRegistrationToken(String token, String userId) {
         DatabaseReference databaseReference = ApplicationHelper.getDatabaseManager().getDatabaseReference();
@@ -127,25 +161,6 @@ public class DatabaseManager {
         });
     }
 
-    public void updateRegistrationToken(final String token) {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            final String currentUserId = firebaseUser.getUid();
-            getProfileSingleValue(currentUserId, new OnObjectChangedListener<Profile>() {
-                @Override
-                public void onObjectChanged(Profile obj) {
-                    if (obj != null) {
-                        addRegistrationToken(token, currentUserId);
-                    } else {
-                        LogUtil.logError(TAG, "updateRegistrationToken", new RuntimeException("Profile not found"));
-                    }
-                }
-            });
-        }
-    }
-
-    //Posts
-
     public String generatePostId() {
         DatabaseReference databaseReference = database.getReference();
         return databaseReference.child("posts").push().getKey();
@@ -167,8 +182,265 @@ public class DatabaseManager {
 
     public Task<Void> removePost(Post post) {
         DatabaseReference databaseReference = database.getReference();
-        DatabaseReference postReference = databaseReference.child("posts").child(post.getId());
-        return postReference.removeValue();
+        DatabaseReference postRef = databaseReference.child("posts").child(post.getId());
+        return postRef.removeValue();
+    }
+
+    public void updateProfileLikeCountAfterRemovingPost(Post post) {
+        DatabaseReference profileRef = database.getReference("profiles/" + post.getAuthorId() + "/likesCount");
+        final long likesByPostCount = post.getLikesCount();
+
+        profileRef.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                Integer currentValue = mutableData.getValue(Integer.class);
+                if (currentValue != null && currentValue >= likesByPostCount) {
+                    mutableData.setValue(currentValue - likesByPostCount);
+                }
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                LogUtil.logInfo(TAG, "Updating likes count transaction is completed.");
+            }
+        });
+
+    }
+
+    public Task<Void> removeImage(String imageTitle) {
+        StorageReference storageRef = storage.getReferenceFromUrl("gs://socialcomponents.appspot.com");
+        StorageReference desertRef = storageRef.child("images/" + imageTitle);
+
+        return desertRef.delete();
+    }
+
+    public void createComment(String commentText, final String postId, final OnTaskCompleteListener onTaskCompleteListener) {
+        try {
+            String authorId = firebaseAuth.getCurrentUser().getUid();
+            DatabaseReference mCommentsReference = database.getReference().child("post-comments/" + postId);
+            String commentId = mCommentsReference.push().getKey();
+            Comment comment = new Comment(commentText);
+            comment.setId(commentId);
+            comment.setAuthorId(authorId);
+
+            mCommentsReference.child(commentId).setValue(comment, new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                    if (databaseError == null) {
+                        incrementCommentsCount(postId);
+                    } else {
+                        LogUtil.logError(TAG, databaseError.getMessage(), databaseError.toException());
+                    }
+                }
+
+                private void incrementCommentsCount(String postId) {
+                    DatabaseReference postRef = database.getReference("posts/" + postId + "/commentsCount");
+                    postRef.runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            Integer currentValue = mutableData.getValue(Integer.class);
+                            if (currentValue == null) {
+                                mutableData.setValue(1);
+                            } else {
+                                mutableData.setValue(currentValue + 1);
+                            }
+
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                            LogUtil.logInfo(TAG, "Updating comments count transaction is completed.");
+                            if (onTaskCompleteListener != null) {
+                                onTaskCompleteListener.onTaskComplete(true);
+                            }
+                        }
+                    });
+                }
+            });
+        } catch (Exception e) {
+            LogUtil.logError(TAG, "createComment()", e);
+        }
+    }
+
+    public void updateComment(String commentId, String commentText, String postId, final OnTaskCompleteListener onTaskCompleteListener) {
+        DatabaseReference mCommentReference = database.getReference().child("post-comments").child(postId).child(commentId).child("text");
+        mCommentReference.setValue(commentText).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                if (onTaskCompleteListener != null) {
+                    onTaskCompleteListener.onTaskComplete(true);
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (onTaskCompleteListener != null) {
+                    onTaskCompleteListener.onTaskComplete(false);
+                }
+                LogUtil.logError(TAG, "updateComment", e);
+            }
+        });
+    }
+
+    public void decrementCommentsCount(String postId, final OnTaskCompleteListener onTaskCompleteListener) {
+        DatabaseReference postRef = database.getReference("posts/" + postId + "/commentsCount");
+        postRef.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                Integer currentValue = mutableData.getValue(Integer.class);
+                if (currentValue != null && currentValue >= 1) {
+                    mutableData.setValue(currentValue - 1);
+                }
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                LogUtil.logInfo(TAG, "Updating comments count transaction is completed.");
+                if (onTaskCompleteListener != null) {
+                    onTaskCompleteListener.onTaskComplete(true);
+                }
+            }
+        });
+    }
+
+    public Task<Void> removeComment(String commentId,  String postId) {
+        DatabaseReference databaseReference = database.getReference();
+        DatabaseReference postRef = databaseReference.child("post-comments").child(postId).child(commentId);
+        return postRef.removeValue();
+    }
+
+    public void onNewLikeAddedListener(ChildEventListener childEventListener) {
+        DatabaseReference mLikesReference = database.getReference().child("post-likes");
+        mLikesReference.addChildEventListener(childEventListener);
+    }
+
+    public void createOrUpdateLike(final String postId, final String postAuthorId) {
+        try {
+            String authorId = firebaseAuth.getCurrentUser().getUid();
+            DatabaseReference mLikesReference = database.getReference().child("post-likes").child(postId).child(authorId);
+            mLikesReference.push();
+            String id = mLikesReference.push().getKey();
+            Like like = new Like(authorId);
+            like.setId(id);
+
+            mLikesReference.child(id).setValue(like, new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                    if (databaseError == null) {
+                        DatabaseReference postRef = database.getReference("posts/" + postId + "/likesCount");
+                        incrementLikesCount(postRef);
+
+                        DatabaseReference profileRef = database.getReference("profiles/" + postAuthorId + "/likesCount");
+                        incrementLikesCount(profileRef);
+                    } else {
+                        LogUtil.logError(TAG, databaseError.getMessage(), databaseError.toException());
+                    }
+                }
+
+                private void incrementLikesCount(DatabaseReference postRef) {
+                    postRef.runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            Integer currentValue = mutableData.getValue(Integer.class);
+                            if (currentValue == null) {
+                                mutableData.setValue(1);
+                            } else {
+                                mutableData.setValue(currentValue + 1);
+                            }
+
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                            LogUtil.logInfo(TAG, "Updating likes count transaction is completed.");
+                        }
+                    });
+                }
+
+            });
+        } catch (Exception e) {
+            LogUtil.logError(TAG, "createOrUpdateLike()", e);
+        }
+
+    }
+
+    public void incrementWatchersCount(String postId) {
+        DatabaseReference postRef = database.getReference("posts/" + postId + "/watchersCount");
+        postRef.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                Integer currentValue = mutableData.getValue(Integer.class);
+                if (currentValue == null) {
+                    mutableData.setValue(1);
+                } else {
+                    mutableData.setValue(currentValue + 1);
+                }
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                LogUtil.logInfo(TAG, "Updating Watchers count transaction is completed.");
+            }
+        });
+    }
+
+    public void removeLike(final String postId, final String postAuthorId) {
+        String authorId = firebaseAuth.getCurrentUser().getUid();
+        DatabaseReference mLikesReference = database.getReference().child("post-likes").child(postId).child(authorId);
+        mLikesReference.removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    DatabaseReference postRef = database.getReference("posts/" + postId + "/likesCount");
+                    decrementLikesCount(postRef);
+
+                    DatabaseReference profileRef = database.getReference("profiles/" + postAuthorId + "/likesCount");
+                    decrementLikesCount(profileRef);
+                } else {
+                    LogUtil.logError(TAG, databaseError.getMessage(), databaseError.toException());
+                }
+            }
+
+            private void decrementLikesCount(DatabaseReference postRef) {
+                postRef.runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        Long currentValue = mutableData.getValue(Long.class);
+                        if (currentValue == null) {
+                            mutableData.setValue(0);
+                        } else {
+                            mutableData.setValue(currentValue - 1);
+                        }
+
+                        return Transaction.success(mutableData);
+                    }
+
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                        LogUtil.logInfo(TAG, "Updating likes count transaction is completed.");
+                    }
+                });
+            }
+        });
+    }
+
+    public UploadTask uploadImage(Uri uri, String imageTitle) {
+        StorageReference storageRef = storage.getReferenceFromUrl(context.getResources().getString(R.string.storage_link));
+        StorageReference riversRef = storageRef.child("images/" + imageTitle);
+        // Create file metadata including the content type
+        StorageMetadata metadata = new StorageMetadata.Builder()
+                .setCacheControl("max-age=7776000, Expires=7776000, public, must-revalidate")
+                .build();
+
+        return riversRef.putFile(uri, metadata);
     }
 
     public void getPostList(final OnPostListChangedListener<Post> onDataChangedListener, long date) {
@@ -275,7 +547,7 @@ public class DatabaseManager {
 
     private PostListResult parsePostList(Map<String, Object> objectMap) {
         PostListResult result = new PostListResult();
-        List<Post> list = new ArrayList<>();
+        List<Post> list = new ArrayList<Post>();
         boolean isMoreDataAvailable = true;
         long lastItemCreatedDate = 0;
 
@@ -346,115 +618,38 @@ public class DatabaseManager {
                 && post.containsKey("description");
     }
 
-    public void isPostExistSingleValue(String postId, final OnObjectExistListener<Post> onObjectExistListener) {
-        DatabaseReference databaseReference = database.getReference("posts").child(postId);
+    public void getProfileSingleValue(String id, final OnObjectChangedListener<Profile> listener) {
+        DatabaseReference databaseReference = getDatabaseReference().child("profiles").child(id);
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                onObjectExistListener.onDataChanged(dataSnapshot.exists());
+                Profile profile = dataSnapshot.getValue(Profile.class);
+                listener.onObjectChanged(profile);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                LogUtil.logError(TAG, "isPostExistSingleValue(), onCancelled", new Exception(databaseError.getMessage()));
+                LogUtil.logError(TAG, "getProfileSingleValue(), onCancelled", new Exception(databaseError.getMessage()));
             }
         });
     }
 
-    //Comments
-
-    public void createComment(String commmentText, final String postId, final OnTaskCompleteListener onTaskCompleteListener) {
-        try {
-            String authorId = firebaseAuth.getCurrentUser().getUid();
-            DatabaseReference mCommentsReference = database.getReference().child("post-comments/" + postId);
-            String commentId = mCommentsReference.push().getKey();
-            Comment comment = new Comment(commmentText);
-            comment.setId(commentId);
-            comment.setAuthorId(authorId);
-
-            mCommentsReference.child(commentId).setValue(comment, new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    if (databaseError == null) {
-                        incrementCommentsCount(postId);
-                    } else {
-                        LogUtil.logError(TAG, databaseError.getMessage(), databaseError.toException());
-                    }
-                }
-
-                private void incrementCommentsCount(String postId) {
-                    DatabaseReference postRef = database.getReference("posts/" + postId + "/commentsCount");
-                    postRef.runTransaction(new Transaction.Handler() {
-                        @Override
-                        public Transaction.Result doTransaction(MutableData mutableData) {
-                            Integer currentValue = mutableData.getValue(Integer.class);
-                            if (currentValue == null) {
-                                mutableData.setValue(1);
-                            } else {
-                                mutableData.setValue(currentValue + 1);
-                            }
-
-                            return Transaction.success(mutableData);
-                        }
-
-                        @Override
-                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                            LogUtil.logInfo(TAG, "Updating comments count transaction is completed.");
-                            if (onTaskCompleteListener != null) {
-                                onTaskCompleteListener.onTaskComplete(true);
-                            }
-                        }
-                    });
-                }
-            });
-        } catch (Exception e) {
-            LogUtil.logError(TAG, "createComment()", e);
-        }
-    }
-
-    public void updateComment(String commentId, String commentText, String postId, final OnTaskCompleteListener onTaskCompleteListener) {
-        DatabaseReference mCommentReference = database.getReference().child("post-comments").child(postId).child(commentId).child("text");
-        mCommentReference.setValue(commentText).addOnSuccessListener(new OnSuccessListener<Void>() {
+    public ValueEventListener getProfile(String id, final OnObjectChangedListener<Profile> listener) {
+        DatabaseReference databaseReference = getDatabaseReference().child("profiles").child(id);
+        ValueEventListener valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onSuccess(Void aVoid) {
-                if (onTaskCompleteListener != null) {
-                    onTaskCompleteListener.onTaskComplete(true);
-                }
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Profile profile = dataSnapshot.getValue(Profile.class);
+                listener.onObjectChanged(profile);
             }
-        }).addOnFailureListener(new OnFailureListener() {
+
             @Override
-            public void onFailure(@NonNull Exception e) {
-                if (onTaskCompleteListener != null) {
-                    onTaskCompleteListener.onTaskComplete(false);
-                }
-                LogUtil.logError(TAG, "updateComment", e);
+            public void onCancelled(DatabaseError databaseError) {
+                LogUtil.logError(TAG, "getProfile(), onCancelled", new Exception(databaseError.getMessage()));
             }
         });
-    }
-
-    public void decrementCommentsCount(String postId, final OnTaskCompleteListener onTaskCompleteListener) {
-        DatabaseReference postRef = database.getReference("posts/" + postId + "/commentCount");
-        postRef.runTransaction(new Transaction.Handler() {
-            @Override
-            public Transaction.Result doTransaction(MutableData mutableData) {
-                Integer currentValue = mutableData.getValue(Integer.class);
-                if (currentValue != null && currentValue >= 1) {
-                    mutableData.setValue(currentValue - 1);
-                }
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
-            }
-        });
-    }
-
-    public Task<Void> removeComment(String commentId, String postId) {
-        DatabaseReference databaseReference = database.getReference();
-        DatabaseReference postReference = databaseReference.child("post-comments").child(postId).child("post-likes");
-        return postReference.removeValue();
+        activeListeners.put(valueEventListener, databaseReference);
+        return valueEventListener;
     }
 
     public ValueEventListener getCommentsList(String postId, final OnDataChangedListener<Comment> onDataChangedListener) {
@@ -487,102 +682,6 @@ public class DatabaseManager {
 
         activeListeners.put(valueEventListener, databaseReference);
         return valueEventListener;
-    }
-
-    //Likes
-
-    public void onNewLikeAddedListener(ChildEventListener childEventListener) {
-        DatabaseReference mLikesReference = database.getReference().child("post-likes");
-        mLikesReference.addChildEventListener(childEventListener);
-    }
-
-    public void createOrUpdateLike(final String postId, final String postAuthorId) {
-        try {
-            String authorId = firebaseAuth.getCurrentUser().getUid();
-            DatabaseReference mLikesReference = database.getReference().child("post-likes").child(postId).child(authorId);
-            mLikesReference.push();
-            String id = mLikesReference.push().getKey();
-            Like like = new Like(authorId);
-            like.setId(id);
-
-            mLikesReference.child(id).setValue(like, new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    if (databaseError == null) {
-                        DatabaseReference postRef = database.getReference("posts/" + postId + "/likesCount");
-                        incrementLikesCount(postRef);
-
-                        DatabaseReference profileRef = database.getReference("profiles/" + postAuthorId + "/likesCount");
-                        incrementLikesCount(profileRef);
-                    } else {
-                        LogUtil.logError(TAG, databaseError.getMessage(), databaseError.toException());
-                    }
-                }
-
-                private void incrementLikesCount(DatabaseReference postRef) {
-                    postRef.runTransaction(new Transaction.Handler() {
-                        @Override
-                        public Transaction.Result doTransaction(MutableData mutableData) {
-                            Integer currentValue = mutableData.getValue(Integer.class);
-                            if (currentValue == null) {
-                                mutableData.setValue(1);
-                            } else {
-                                mutableData.setValue(currentValue + 1);
-                            }
-
-                            return Transaction.success(mutableData);
-                        }
-
-                        @Override
-                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                            LogUtil.logInfo(TAG, "Updating likes count transaction is completed.");
-                        }
-                    });
-                }
-            });
-        } catch (Exception e) {
-            LogUtil.logError(TAG, "createOrUpdateLike()", e);
-        }
-    }
-
-    public void removeLike(final String postId, final String postAuthorId) {
-        String authorId = firebaseAuth.getCurrentUser().getUid();
-        DatabaseReference mLikesReference = database.getReference().child("post-likes").child(postId).child(authorId);
-        mLikesReference.removeValue(new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                if (databaseError == null) {
-                    DatabaseReference postRef = database.getReference("posts/" + postId + "/likesCount");
-                    decrementLikesCount(postRef);
-
-                    DatabaseReference profileRef = database.getReference("profiles/" + postAuthorId + "/likesCount");
-                    decrementLikesCount(profileRef);
-                } else {
-                    LogUtil.logError(TAG, databaseError.getMessage(), databaseError.toException());
-                }
-            }
-
-            private void decrementLikesCount(DatabaseReference postRef) {
-                postRef.runTransaction(new Transaction.Handler() {
-                    @Override
-                    public Transaction.Result doTransaction(MutableData mutableData) {
-                        Long currentValue = mutableData.getValue(Long.class);
-                        if (currentValue == null) {
-                            mutableData.setValue(0);
-                        } else {
-                            mutableData.setValue(currentValue - 1);
-                        }
-
-                        return Transaction.success(mutableData);
-                    }
-
-                    @Override
-                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                        LogUtil.logInfo(TAG, "Updating likes count transaction is completed.");
-                    }
-                });
-            }
-        });
     }
 
     public ValueEventListener hasCurrentUserLike(String postId, String userId, final OnObjectExistListener<Like> onObjectExistListener) {
@@ -618,73 +717,27 @@ public class DatabaseManager {
         });
     }
 
-    //Profile
+    public void addComplainToPost(Post post) {
+        DatabaseReference databaseReference = getDatabaseReference();
+        databaseReference.child("posts").child(post.getId()).child("hasComplain").setValue(true);
+    }
 
-    public void getProfileSingleValue(String id, final OnObjectChangedListener<Profile> listener) {
-        DatabaseReference databaseReference = getDatabaseReference().child("profiles").child(id);
+    public void isPostExistSingleValue(String postId, final OnObjectExistListener<Post> onObjectExistListener) {
+        DatabaseReference databaseReference = database.getReference("posts").child(postId);
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Profile profile = dataSnapshot.getValue(Profile.class);
-                listener.onObjectChanged(profile);
+                onObjectExistListener.onDataChanged(dataSnapshot.exists());
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                LogUtil.logError(TAG, "getProfileSingleValue(), onCancelled", new Exception(databaseError.getMessage()));
+                LogUtil.logError(TAG, "isPostExistSingleValue(), onCancelled", new Exception(databaseError.getMessage()));
             }
         });
     }
 
-    public ValueEventListener getProfile(String id, final OnObjectChangedListener<Profile> listener) {
-        DatabaseReference databaseReference = getDatabaseReference().child("profiles").child(id);
-        ValueEventListener valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Profile profile = dataSnapshot.getValue(Profile.class);
-                listener.onObjectChanged(profile);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                LogUtil.logError(TAG, "getProfile(), onCancelled", new Exception(databaseError.getMessage()));
-            }
-        });
-        activeListeners.put(valueEventListener, databaseReference);
-        return valueEventListener;
-    }
-
-    public void createOrUpdateProfile(final Profile profile, final OnProfileCreatedListener onProfileCreatedListener) {
-        DatabaseReference databaseReference = ApplicationHelper.getDatabaseManager().getDatabaseReference();
-        Task<Void> task = databaseReference.child("profiles").child(profile.getId()).setValue(profile);
-        task.addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                onProfileCreatedListener.onProfileCreated(task.isSuccessful());
-                addRegistrationToken(FirebaseInstanceId.getInstance().getToken(), profile.getId());
-                LogUtil.logDebug(TAG, "createOrUpdateProfile, success: " + task.isSuccessful());
-            }
-        });
-    }
-
-    //Messages
-
-    //Images
-
-    public Task<Void> removeImage(String imageTitle) {
-        //StorageReference storageReference = storage.getReferenceFromUrl(String.valueOf(R.string.storage_link));
-        //StorageReference desertReference = storageReference.child("images/" + imageTitle);
-        return null;//desertReference.delete();
-    }
-
-    public UploadTask uploadImage(Uri uri, String imageTitle) {
-        //StorageReference storageRef = storage.getReferenceFromUrl(context.getResources().getString(R.string.storage_link));
-        //StorageReference riversRef = storageRef.child("images/" + imageTitle);
-        // Create file metadata including the content type
-        StorageMetadata metadata = new StorageMetadata.Builder()
-                .setCacheControl("max-age=7776000, Expires=7776000, public, must-revalidate")
-                .build();
-
-        return null; //riversRef.putFile(uri, metadata);
+    public void subscribeToNewPosts() {
+        FirebaseMessaging.getInstance().subscribeToTopic("postsTopic");
     }
 }

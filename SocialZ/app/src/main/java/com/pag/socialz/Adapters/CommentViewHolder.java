@@ -76,9 +76,7 @@ public class CommentViewHolder extends RecyclerView.ViewHolder{
             @Override
             public void onObjectChanged(Profile obj) {
                 String userName = obj.getUsername();
-                Spannable contentString = new SpannableStringBuilder(userName + " " + comment);
-                contentString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, R.color.colorAccent)),0,userName.length(),Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                commentTextView.setText(contentString);
+                fillComment(userName,comment,expandableTextView);
                 if(obj.getPhotoUrl() != null){
                     Glide.with(context)
                             .load(obj.getPhotoUrl())
@@ -88,5 +86,13 @@ public class CommentViewHolder extends RecyclerView.ViewHolder{
                 }
             }
         };
+    }
+
+    private void fillComment(String userName, String comment, ExpandableTextView commentTextView) {
+        Spannable contentString = new SpannableStringBuilder(userName + "   " + comment);
+        contentString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, R.color.highlight_text)),
+                0, userName.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        commentTextView.setText(contentString);
     }
 }

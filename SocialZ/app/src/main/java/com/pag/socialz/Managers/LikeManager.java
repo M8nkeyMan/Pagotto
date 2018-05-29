@@ -79,7 +79,7 @@ public class LikeManager {
     }
 
     private void colorAnimateImageView(){
-        final int activatedColor = context.getResources().getColor(R.color.colorAccent); //TODO change color
+        final int activatedColor = context.getResources().getColor(R.color.like_icon_activated); //TODO change color
         final ValueAnimator colorAnimator = !isLiked?ObjectAnimator.ofFloat(0f,1f):ObjectAnimator.ofFloat(1f,0f);
         colorAnimator.setDuration(ANIMATION_DURATION);
         colorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {

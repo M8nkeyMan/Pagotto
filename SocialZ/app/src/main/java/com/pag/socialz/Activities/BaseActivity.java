@@ -38,6 +38,10 @@ public class BaseActivity extends AppCompatActivity {
         return (super.onOptionsItemSelected(menuItem));
     }
 
+    public void showProgress() {
+        showProgress(R.string.loading);
+    }
+
     public void showProgress(int message){
         hideProgress();
         progressDialog = new ProgressDialog(this);

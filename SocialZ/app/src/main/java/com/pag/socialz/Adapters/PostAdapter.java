@@ -59,7 +59,7 @@ public class PostAdapter extends BasePostAdapter{
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if (viewType == ItemType.ITEM.getTypeCode()) {
-            return null;//new PostViewHolder(inflater.inflate(R.layout.post_item_list_view, parent, false));
+            return new PostViewHolder(inflater.inflate(R.layout.post_item_list_view, parent, false),createOnClickListener());
         } else {
             return new LoadingViewHolder(inflater.inflate(R.layout.loading_view, parent, false));
         }

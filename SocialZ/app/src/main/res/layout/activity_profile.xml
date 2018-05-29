@@ -80,7 +80,7 @@
                             android:layout_centerInParent="true"
                             android:visibility="visible" />
 
-                        <com.rozdoum.socialcomponents.views.CircularImageView
+                        <com.pag.socialz.CustomViews.CircularImageView
                             android:id="@+id/imageView"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"

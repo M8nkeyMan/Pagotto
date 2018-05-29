@@ -89,7 +89,7 @@ public class PostManager extends FirebaseListenerManager {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                    Uri downloadUrl = taskSnapshot.getUploadSessionUri();
+                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
                     LogUtil.logDebug(TAG, "successful upload image, image url: " + String.valueOf(downloadUrl));
 
                     post.setImagePath(String.valueOf(downloadUrl));
@@ -174,5 +174,15 @@ public class PostManager extends FirebaseListenerManager {
 
     public interface PostCounterWatcher {
         void onPostCounterChanged(int newValue);
+    }
+
+    public void incrementWatchersCount(String postId) {
+        DatabaseManager databaseHelper = ApplicationHelper.getDatabaseManager();
+        databaseHelper.incrementWatchersCount(postId);
+    }
+
+    public void addComplain(Post post) {
+        DatabaseManager databaseHelper = ApplicationHelper.getDatabaseManager();
+        databaseHelper.addComplainToPost(post);
     }
 }

@@ -25,6 +25,7 @@ import com.pag.socialz.Models.Profile;
 import com.pag.socialz.R;
 
 public class PostViewHolder extends RecyclerView.ViewHolder {
+
     public static final String TAG = PostViewHolder.class.getSimpleName();
 
     private Context context;
@@ -60,16 +61,16 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         super(view);
         this.context = view.getContext();
 
-        postImageView = (ImageView) view.findViewById(R.id.postImageView);
-        /*likeCounterTextView = (TextView) view.findViewById(R.id.likeCounterTextView);
-        likesImageView = (ImageView) view.findViewById(R.id.likesImageView);
-        commentsCountTextView = (TextView) view.findViewById(R.id.commentsCountTextView);
-        watcherCounterTextView = (TextView) view.findViewById(R.id.watcherCounterTextView);
-        dateTextView = (TextView) view.findViewById(R.id.dateTextView);
-        titleTextView = (TextView) view.findViewById(R.id.titleTextView);
-        detailsTextView = (TextView) view.findViewById(R.id.detailsTextView);
-        authorImageView = (ImageView) view.findViewById(R.id.authorImageView);
-        likeViewGroup = (ViewGroup) view.findViewById(R.id.likesContainer);*/
+        postImageView = view.findViewById(R.id.postImageView);
+        likeCounterTextView = view.findViewById(R.id.likeCounterTextView);
+        likesImageView = view.findViewById(R.id.likesImageView);
+        commentsCountTextView = view.findViewById(R.id.commentsCountTextView);
+        watcherCounterTextView = view.findViewById(R.id.watcherCounterTextView);
+        dateTextView = view.findViewById(R.id.dateTextView);
+        titleTextView = view.findViewById(R.id.titleTextView);
+        detailsTextView = view.findViewById(R.id.detailsTextView);
+        authorImageView = view.findViewById(R.id.authorImageView);
+        likeViewGroup = view.findViewById(R.id.likesContainer);
 
         authorImageView.setVisibility(isAuthorNeeded ? View.VISIBLE : View.GONE);
 
@@ -128,7 +129,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
                 .override(width, height)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .crossFade()
-                //.error(R.drawable.ic_stub)
+                .error(R.drawable.ic_stub)
                 .into(postImageView);
         if (post.getAuthorId() != null) {
             profileManager.getProfileSingleValue(post.getAuthorId(), createProfileChangeListener(authorImageView));

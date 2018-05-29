@@ -10,33 +10,45 @@ public class AnimationManager {
     public final static int SHORT_DURATION = 200;
     public final static int ALPHA_SHORT_DURATION = 400;
 
-    public static ViewPropertyAnimator hideViewByScale (View v) {
-
-        ViewPropertyAnimator propertyAnimator = v.animate().setStartDelay(DEFAULT_DELAY).setDuration(SHORT_DURATION)
-                .scaleX(0).scaleY(0);
-
-        return propertyAnimator;
+    /**
+     * Reduces the X & Y
+     *
+     * @param v the view to be scaled
+     * @return the ViewPropertyAnimation to manage the animation
+     */
+    public static ViewPropertyAnimator hideViewByScale(View v) {
+        return v.animate()
+                .setStartDelay(DEFAULT_DELAY)
+                .setDuration(SHORT_DURATION)
+                .scaleX(0)
+                .scaleY(0);
     }
 
-    public static ViewPropertyAnimator showViewByScale (View v) {
-
-        ViewPropertyAnimator propertyAnimator = v.animate().setStartDelay(DEFAULT_DELAY)
-                .scaleX(1).scaleY(1);
-
-        return propertyAnimator;
+    /**
+     * Shows a view by scaling
+     *
+     * @param v the view to be scaled
+     * @return the ViewPropertyAnimation to manage the animation
+     */
+    public static ViewPropertyAnimator showViewByScale(View v) {
+        return v.animate()
+                .setStartDelay(DEFAULT_DELAY)
+                .scaleX(1)
+                .scaleY(1);
     }
 
-    public static ViewPropertyAnimator hideViewByScaleAndVisibility (final View v) {
-
-        ViewPropertyAnimator propertyAnimator = v.animate().setStartDelay(DEFAULT_DELAY).setDuration(SHORT_DURATION)
-                .scaleX(0).scaleY(0).withEndAction(new Runnable() {
+    public static ViewPropertyAnimator hideViewByScaleAndVisibility(final View v) {
+        return v.animate()
+                .setStartDelay(DEFAULT_DELAY)
+                .setDuration(SHORT_DURATION)
+                .scaleX(0)
+                .scaleY(0)
+                .withEndAction(new Runnable() {
                     @Override
                     public void run() {
                         v.setVisibility(View.GONE);
                     }
                 });
-
-        return propertyAnimator;
     }
 
     public static AlphaAnimation hideViewByAlpha(final View v) {
@@ -46,9 +58,12 @@ public class AnimationManager {
         return alphaAnimation;
     }
 
-    public static ViewPropertyAnimator showViewByScaleAndVisibility (View v) {
+    public static ViewPropertyAnimator showViewByScaleAndVisibility(View v) {
         v.setVisibility(View.VISIBLE);
-        ViewPropertyAnimator propertyAnimator = v.animate().setStartDelay(DEFAULT_DELAY).scaleX(1).scaleY(1);
-        return propertyAnimator;
+
+        return v.animate()
+                .setStartDelay(DEFAULT_DELAY)
+                .scaleX(1)
+                .scaleY(1);
     }
 }

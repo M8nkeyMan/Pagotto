@@ -30,7 +30,7 @@
                 android:layout_marginBottom="@dimen/intrinsic_padding"
                 android:scaleType="centerCrop" />
 
-            <!--<com.rozdoum.socialcomponents.views.CircularImageView
+            <com.pag.socialz.CustomViews.CircularImageView
                 android:id="@+id/authorImageView"
                 android:layout_width="@dimen/post_list_item_author_image_side"
                 android:layout_height="@dimen/post_list_item_author_image_side"
@@ -41,9 +41,9 @@
                 app:border="false"
                 app:shadow="true"
                 app:shadow_radius="@dimen/circle_image_shadow_radius"
-                app:shadow_color="@color/circle_image_shadow" />-->
+                app:shadow_color="@color/circle_image_shadow"/>
 
-            <!--<<TextView
+            <TextView
                 android:id="@+id/titleTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
                 android:layout_marginRight="@dimen/intrinsic_padding"
                 android:layout_marginLeft="@dimen/intrinsic_padding"
                 android:layout_below="@+id/detailsTextView"
-                android:layout_toStartOf="@+id/authorImageView" />-->
+                android:layout_toStartOf="@+id/authorImageView" />
 
         </RelativeLayout>
 

@@ -1,6 +1,5 @@
 package com.pag.socialz.Activities;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,7 +35,6 @@ import com.pag.socialz.Models.Post;
 import com.pag.socialz.R;
 
 public class MainActivity extends BaseActivity{
-
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -113,23 +111,21 @@ public class MainActivity extends BaseActivity{
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        //inflater.inflate(R.menu.main_menu, menu);
+        inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case 0:
+            case R.id.profile:
                 ProfileStatus profileStatus = profileManager.checkProfile();
-
                 if (profileStatus.equals(ProfileStatus.PROFILE_CREATED)) {
                     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     openProfileActivity(userId);
                 } else {
                     doAuthorization(profileStatus);
                 }
-
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -186,7 +182,7 @@ public class MainActivity extends BaseActivity{
 
                 @Override
                 public void onAuthorClick(String authorId, View view) {
-                    //openProfileActivity(authorId, view);
+                    openProfileActivity(authorId, view);
                 }
 
                 @Override
@@ -328,7 +324,6 @@ public class MainActivity extends BaseActivity{
         openProfileActivity(userId, null);
     }
 
-    @SuppressLint("RestrictedApi")
     private void openProfileActivity(String userId, View view) {
         Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
         intent.putExtra(ProfileActivity.USER_ID_EXTRA_KEY, userId);

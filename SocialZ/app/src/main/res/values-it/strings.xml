@@ -58,7 +58,7 @@
     <string name="error_google_play_services">Errore in Google Play Services</string>
     <string name="button_login_with_google">Accedi con Google</string>
     <string name="loading">Caricamento...</string>
-    <string name="removing">Rimuovo...</string>
+    <string name="removing">Rimozione...</string>
     <string name="error_general">Qualcosa è andato storto</string>
     <string name="error_general_post">Qualcosa è andato storto col post, id: %1$s</string>
     <string name="internet_connection_failed">Nessuna connessione ad internet</string>
@@ -68,7 +68,7 @@
     <string name="profile_menu_item">Profilo</string>
     <string name="collapse_text_label">Mostra meno</string>
     <string name="expand_text_label">Mostra di più</string>
-    <string name="add_complain">Reclamo</string>
+    <string name="add_complain">Sporgi Reclamo</string>
     <string name="edit_post_menu">Modifica post</string>
     <string name="delete_post_menu">Elimina post</string>
     <string name="complain_text">Puoi sporgere reclamo se contiene violenza,[...]</string>

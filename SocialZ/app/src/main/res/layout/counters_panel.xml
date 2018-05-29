@@ -16,6 +16,7 @@
 
         <ImageView
             android:id="@+id/watcherImageView"
+            app:srcCompat="@drawable/ic_watchers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -39,6 +40,7 @@
 
         <ImageView
             android:id="@+id/likesImageView"
+            app:srcCompat="@drawable/ic_like"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -62,6 +64,7 @@
 
         <ImageView
             android:id="@+id/commentsCountImageView"
+            app:srcCompat="@drawable/ic_comments"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -86,6 +89,7 @@
 
         <ImageView
             android:id="@+id/dateImageView"
+            app:srcCompat="@drawable/ic_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
