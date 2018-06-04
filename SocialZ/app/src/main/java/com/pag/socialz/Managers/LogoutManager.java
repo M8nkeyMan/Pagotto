@@ -32,6 +32,7 @@ public class LogoutManager {
     private static void logout(String providerId, GoogleApiClient mGoogleApiClient, FragmentActivity fragmentActivity){
         switch (providerId){
             case GoogleAuthProvider.PROVIDER_ID:
+                looutGoogle(mGoogleApiClient,fragmentActivity);
                 break;
         }
     }
@@ -42,7 +43,7 @@ public class LogoutManager {
     }
 
     private static void looutGoogle(GoogleApiClient mGoogleApiClient, FragmentActivity fragmentActivity){
-        //if(mGoogleApiClient != null) mGoogleApiClient = GoogleApiHelper
+        //if(mGoogleApiClient != null)
     }
 
     private static class ClearImageCache extends AsyncTask<Void, Void, Void>{

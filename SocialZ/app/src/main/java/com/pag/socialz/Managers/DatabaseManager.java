@@ -210,7 +210,7 @@ public class DatabaseManager {
     }
 
     public Task<Void> removeImage(String imageTitle) {
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://socialcomponents.appspot.com");
+        StorageReference storageRef = storage.getReferenceFromUrl("gs://socialz-epag-m2018.appspot.com/");
         StorageReference desertRef = storageRef.child("images/" + imageTitle);
 
         return desertRef.delete();
