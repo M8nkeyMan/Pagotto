@@ -81,7 +81,6 @@ public class PostManager extends FirebaseListenerManager {
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
-                    // Handle unsuccessful uploads
                     onPostCreatedListener.onPostSaved(false);
 
                 }

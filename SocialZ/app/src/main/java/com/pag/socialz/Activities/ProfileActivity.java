@@ -111,10 +111,7 @@ public class ProfileActivity extends BaseActivity implements GoogleApiClient.OnC
     public void onStart() {
         super.onStart();
         loadProfile();
-
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
+        if (mGoogleApiClient != null)  mGoogleApiClient.connect();
     }
 
     @Override

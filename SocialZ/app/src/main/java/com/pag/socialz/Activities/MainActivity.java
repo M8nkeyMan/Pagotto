@@ -1,5 +1,7 @@
 package com.pag.socialz.Activities;
 
+import android.annotation.SuppressLint;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -82,7 +84,6 @@ public class MainActivity extends BaseActivity{
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case ProfileActivity.CREATE_POST_FROM_PROFILE_REQUEST:
@@ -309,10 +310,19 @@ public class MainActivity extends BaseActivity{
         }
     }
 
+    @SuppressLint("RestrictedApi")
     private void openPostDetailsActivity(Post post, View v) {
         Intent intent = new Intent(MainActivity.this, PostDetailsActivity.class);
         intent.putExtra(PostDetailsActivity.POST_ID_EXTRA_KEY, post.getId());
-        startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST);
+        View imageView = v.findViewById(R.id.postImageView);
+        View authorImageView = v.findViewById(R.id.authorImageView);
+
+        ActivityOptions options = ActivityOptions.
+                makeSceneTransitionAnimation(MainActivity.this,
+                        new android.util.Pair<>(imageView, getString(R.string.post_image_transition_name)),
+                        new android.util.Pair<>(authorImageView, getString(R.string.post_author_image_transition_name))
+                );
+        startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST, options.toBundle());
     }
 
     private void openCreatePostActivity() {

@@ -77,8 +77,6 @@ public class DatabaseManager {
         database = FirebaseDatabase.getInstance();
         database.setPersistenceEnabled(true);
         storage = FirebaseStorage.getInstance();
-
-//        Sets the maximum time to retry upload operations if a failure occurs.
         storage.setMaxUploadRetryTimeMillis(Constants.Database.MAX_UPLOAD_RETRY_MILLIS);
     }
 
@@ -435,22 +433,17 @@ public class DatabaseManager {
     public UploadTask uploadImage(Uri uri, String imageTitle) {
         StorageReference storageRef = storage.getReferenceFromUrl(context.getResources().getString(R.string.storage_link));
         StorageReference riversRef = storageRef.child("images/" + imageTitle);
-        // Create file metadata including the content type
         StorageMetadata metadata = new StorageMetadata.Builder()
                 .setCacheControl("max-age=7776000, Expires=7776000, public, must-revalidate")
                 .build();
-
         return riversRef.putFile(uri, metadata);
     }
 
     public void getPostList(final OnPostListChangedListener<Post> onDataChangedListener, long date) {
         DatabaseReference databaseReference = database.getReference("posts");
         Query postsQuery;
-        if (date == 0) {
-            postsQuery = databaseReference.limitToLast(Constants.Post.POST_AMOUNT_ON_PAGE).orderByChild("createdDate");
-        } else {
-            postsQuery = databaseReference.limitToLast(Constants.Post.POST_AMOUNT_ON_PAGE).endAt(date).orderByChild("createdDate");
-        }
+        if (date == 0) postsQuery = databaseReference.limitToLast(Constants.Post.POST_AMOUNT_ON_PAGE).orderByChild("createdDate");
+        else postsQuery = databaseReference.limitToLast(Constants.Post.POST_AMOUNT_ON_PAGE).endAt(date).orderByChild("createdDate");
 
         postsQuery.keepSynced(true);
         postsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -740,4 +733,5 @@ public class DatabaseManager {
     public void subscribeToNewPosts() {
         FirebaseMessaging.getInstance().subscribeToTopic("postsTopic");
     }
+
 }

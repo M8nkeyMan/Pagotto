@@ -65,14 +65,7 @@ public abstract class ImagePickerActivity extends BaseActivity{
             if (isImageFileValid(imageUri)) {
                 this.imageUri = imageUri;
             }
-            // For API >= 23 we need to check specifically that we have permissions to read external storage.
-            if (CropImage.isReadExternalStoragePermissionsRequired(this, imageUri)) {
-                // request permissions and handle the result in onRequestPermissionsResult()
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE);
-            } else {
-                // no permissions required or already grunted
-                onImagePickedAction();
-            }
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, CropImage.PICK_IMAGE_PERMISSIONS_REQUEST_CODE);
         }
     }
 
@@ -99,11 +92,8 @@ public abstract class ImagePickerActivity extends BaseActivity{
     }
 
     public void onSelectImageClick(View view){
-        if (CropImage.isExplicitCameraPermissionRequired(this)) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, CropImage.CAMERA_CAPTURE_PERMISSIONS_REQUEST_CODE);
-        } else {
-            CropImage.startPickImageActivity(this);
-        }
+        if (CropImage.isExplicitCameraPermissionRequired(this)) requestPermissions(new String[]{Manifest.permission.CAMERA}, CropImage.CAMERA_CAPTURE_PERMISSIONS_REQUEST_CODE);
+         else CropImage.startPickImageActivity(this);
     }
 
     protected void loadImageToImageView(){

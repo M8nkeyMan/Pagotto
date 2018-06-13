@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.pag.socialz.Activities.BaseActivity;
 import com.pag.socialz.Activities.MainActivity;
 import com.pag.socialz.ApplicationHelper;
+import com.pag.socialz.Enums.ProfileStatus;
 import com.pag.socialz.Listeners.OnObjectExistListener;
 import com.pag.socialz.Models.Post;
 import com.pag.socialz.R;
@@ -71,7 +72,7 @@ public class LikeManager {
         bounceAnimY.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                //TODO mettere resources
+                likesImageView.setImageResource(!isLiked?R.drawable.ic_like_activated : R.drawable.ic_like);
             }
         });
         animatorSet.play(bounceAnimX).with(bounceAnimY);
@@ -79,7 +80,7 @@ public class LikeManager {
     }
 
     private void colorAnimateImageView(){
-        final int activatedColor = context.getResources().getColor(R.color.like_icon_activated); //TODO change color
+        final int activatedColor = context.getResources().getColor(R.color.like_icon_activated);
         final ValueAnimator colorAnimator = !isLiked?ObjectAnimator.ofFloat(0f,1f):ObjectAnimator.ofFloat(1f,0f);
         colorAnimator.setDuration(ANIMATION_DURATION);
         colorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -128,7 +129,7 @@ public class LikeManager {
 
     private void showWarningMessage(BaseActivity baseActivity, int messageId){
         if(baseActivity instanceof MainActivity){
-            //((MainActivity)baseActivity).showFloatButtonRelatedSnackBar(messageId);
+            ((MainActivity)baseActivity).showFloatButtonRelatedSnackBar(messageId);
         }else{
             baseActivity.showSnackBar(messageId);
         }
@@ -143,11 +144,8 @@ public class LikeManager {
     public void likeClickAction(long previous){
         if(!updatingLikeCounter){
             startAnimateLikeButton(likeAnimationType);
-            if(!isLiked){
-                addLike(previous);
-            }else{
-                removeLike(previous);
-            }
+            if(!isLiked) addLike(previous);
+            else removeLike(previous);
         }
     }
 
@@ -179,17 +177,26 @@ public class LikeManager {
         PostManager.getInstance(baseActivity.getApplicationContext()).isPostExistSingleValue(post.getId(), new OnObjectExistListener<Post>() {
             @Override
             public void onDataChanged(boolean exist) {
-                if(exist){
-                    if(baseActivity.hasInternetConnection()){
-
-                    }
-                }
+                if(exist)
+                    if(baseActivity.hasInternetConnection()) doHandleLikeClickAction(baseActivity,post);
+                    else showWarningMessage(baseActivity,R.string.internet_connection_failed);
+                else showWarningMessage(baseActivity,R.string.message_post_was_removed);
             }
         });
     }
 
     public void initLike(boolean isLiked){
-        likesImageView.setImageResource(0); //TODO insert drawables for likes
+        likesImageView.setImageResource(isLiked? R.drawable.ic_like_activated : R.drawable.ic_like);
         this.isLiked = isLiked;
+    }
+
+    private void doHandleLikeClickAction(BaseActivity baseActivity, Post post){
+        ProfileStatus profileStatus = ProfileManager.getInstance(baseActivity).checkProfile();
+        if(profileStatus.equals(ProfileStatus.PROFILE_CREATED)){
+            if(isListView) likeClickActionLocal(post);
+            else likeClickAction(post.getLikesCount());
+        }else{
+            baseActivity.doAuthorization(profileStatus);
+        }
     }
 }
