@@ -15,7 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import com.pag.socialz.Managers.LogUtil;
+import com.pag.socialz.Util.LogUtil;
 import com.pag.socialz.R;
 
 @SuppressLint("AppCompatCustomView")

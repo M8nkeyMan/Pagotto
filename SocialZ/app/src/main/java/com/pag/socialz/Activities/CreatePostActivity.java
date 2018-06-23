@@ -13,7 +13,7 @@ import android.widget.ProgressBar;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.pag.socialz.Listeners.OnPostCreatedListener;
-import com.pag.socialz.Managers.LogUtil;
+import com.pag.socialz.Util.LogUtil;
 import com.pag.socialz.Managers.PostManager;
 import com.pag.socialz.Managers.ValidationUtils;
 import com.pag.socialz.Models.Post;

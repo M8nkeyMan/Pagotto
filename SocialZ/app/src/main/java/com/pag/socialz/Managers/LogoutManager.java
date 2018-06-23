@@ -17,6 +17,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.pag.socialz.Util.GoogleApiUtil;
+import com.pag.socialz.Util.LogUtil;
 
 public class LogoutManager {
 

@@ -1,6 +1,6 @@
 package com.pag.socialz.Models;
 
-import com.pag.socialz.Managers.FormatterUtil;
+import com.pag.socialz.Util.FormatterUtil;
 
 import java.util.Calendar;
 import java.util.Date;

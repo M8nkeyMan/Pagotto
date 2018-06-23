@@ -1,4 +1,4 @@
-package com.pag.socialz.Managers;
+package com.pag.socialz.Util;
 
 import android.support.v4.app.FragmentActivity;
 

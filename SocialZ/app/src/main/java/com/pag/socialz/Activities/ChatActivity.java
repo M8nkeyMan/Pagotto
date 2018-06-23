@@ -10,5 +10,6 @@ public class ChatActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        if(!hasInternetConnection()) showSnackBar("");
     }
 }

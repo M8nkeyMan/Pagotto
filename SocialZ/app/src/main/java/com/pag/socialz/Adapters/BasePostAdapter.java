@@ -4,7 +4,7 @@ import android.support.v7.widget.RecyclerView;
 
 import com.pag.socialz.Activities.BaseActivity;
 import com.pag.socialz.Listeners.OnPostChangedListener;
-import com.pag.socialz.Managers.LogUtil;
+import com.pag.socialz.Util.LogUtil;
 import com.pag.socialz.Managers.PostManager;
 import com.pag.socialz.Models.Post;
 

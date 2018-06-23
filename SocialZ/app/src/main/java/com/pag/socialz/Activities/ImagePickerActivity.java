@@ -17,7 +17,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.pag.socialz.Constants;
-import com.pag.socialz.Managers.LogUtil;
+import com.pag.socialz.Util.LogUtil;
 import com.pag.socialz.Managers.ValidationUtils;
 import com.pag.socialz.R;
 import com.theartofdev.edmodo.cropper.CropImage;

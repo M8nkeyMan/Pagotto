@@ -1,4 +1,4 @@
-package com.pag.socialz.Managers;
+package com.pag.socialz.Util;
 
 import android.content.Context;
 import android.graphics.Point;

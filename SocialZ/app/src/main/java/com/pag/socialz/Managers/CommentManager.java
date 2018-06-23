@@ -10,6 +10,7 @@ import com.pag.socialz.ApplicationHelper;
 import com.pag.socialz.Listeners.OnDataChangedListener;
 import com.pag.socialz.Listeners.OnTaskCompleteListener;
 import com.pag.socialz.Models.Comment;
+import com.pag.socialz.Util.LogUtil;
 
 public class CommentManager extends FirebaseListenerManager {
 

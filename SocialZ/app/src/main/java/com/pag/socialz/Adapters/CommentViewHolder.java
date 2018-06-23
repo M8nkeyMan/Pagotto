@@ -14,7 +14,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.pag.socialz.CustomViews.ExpandableTextView;
 import com.pag.socialz.Listeners.OnObjectChangedListener;
-import com.pag.socialz.Managers.FormatterUtil;
+import com.pag.socialz.Util.FormatterUtil;
 import com.pag.socialz.Managers.ProfileManager;
 import com.pag.socialz.Models.Comment;
 import com.pag.socialz.Models.Profile;

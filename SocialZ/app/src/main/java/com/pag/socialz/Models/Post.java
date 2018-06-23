@@ -1,7 +1,7 @@
 package com.pag.socialz.Models;
 
 import com.pag.socialz.Enums.ItemType;
-import com.pag.socialz.Managers.FormatterUtil;
+import com.pag.socialz.Util.FormatterUtil;
 
 import java.io.Serializable;
 import java.util.Date;

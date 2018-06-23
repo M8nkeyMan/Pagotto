@@ -1,4 +1,4 @@
-package com.pag.socialz.Managers;
+package com.pag.socialz.Util;
 
 import com.pag.socialz.Enums.UploadImagePrefix;
 
