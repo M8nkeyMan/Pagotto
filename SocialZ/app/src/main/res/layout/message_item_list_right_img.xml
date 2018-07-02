@@ -23,14 +23,14 @@
         android:id="@+id/contentMessageChat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cmv_arrowGravity="end"
-        app:cmv_arrowMargin="3dp"
-        app:cmv_arrowPosition="right"
-        app:cmv_backgroundColor="@color/colorAccent"
-        app:cmv_backgroundColorPressed="#FFBABABA"
-        app:cmv_contentPadding="10dp"
-        app:cmv_cornerRadius="3dp"
-        app:cmv_showArrow="true"
+        app:mv_arrowGravity="end"
+        app:mv_arrowMargin="3dp"
+        app:mv_arrowPosition="right"
+        app:mv_backgroundColor="#fff"
+        app:mv_backgroundColorPressed="#FFBABABA"
+        app:mv_contentPadding="10dp"
+        app:mv_cornerRadius="3dp"
+        app:mv_showArrow="true"
         >
 
         <ImageView

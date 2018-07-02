@@ -21,12 +21,12 @@
         android:id="@+id/contentMessageChat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cmv_backgroundColor="#fff"
-        app:cmv_backgroundColorPressed="#FFBABABA"
-        app:cmv_arrowGravity="end"
-        app:cmv_arrowPosition="left"
-        app:cmv_cornerRadius="3dp"
-        app:cmv_showArrow="true"
+        app:mv_backgroundColor="#fff"
+        app:mv_backgroundColorPressed="#FFBABABA"
+        app:mv_arrowGravity="end"
+        app:mv_arrowPosition="left"
+        app:mv_cornerRadius="3dp"
+        app:mv_showArrow="true"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/ivUserChat">
 
@@ -35,7 +35,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textIsSelectable="true"
-            emojicon:emojiconSize="28sp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     </com.pag.socialz.CustomViews.MessageView>
