@@ -1,5 +1,6 @@
 package com.pag.socialz.Activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -33,6 +34,7 @@ public class CreatePostActivity extends ImagePickerActivity implements OnPostCre
     protected boolean creatingPost = false;
 
     @Override
+    @SuppressLint("ClickableViewAccessibility")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);

@@ -168,11 +168,9 @@ public class DatabaseManager {
     public void createOrUpdatePost(Post post) {
         try {
             DatabaseReference databaseReference = database.getReference();
-
             Map<String, Object> postValues = post.toMap();
             Map<String, Object> childUpdates = new HashMap<>();
             childUpdates.put("/posts/" + post.getId(), postValues);
-
             databaseReference.updateChildren(childUpdates);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -443,8 +441,15 @@ public class DatabaseManager {
     public void getPostList(final OnPostListChangedListener<Post> onDataChangedListener, long date) {
         DatabaseReference databaseReference = database.getReference("posts");
         Query postsQuery;
-        if (date == 0) postsQuery = databaseReference.limitToLast(Constants.Post.POST_AMOUNT_ON_PAGE).orderByChild("createdDate");
-        else postsQuery = databaseReference.limitToLast(Constants.Post.POST_AMOUNT_ON_PAGE).endAt(date).orderByChild("createdDate");
+        if (date == 0)
+            postsQuery = databaseReference
+                    .limitToLast(Constants.Post.POST_AMOUNT_ON_PAGE)
+                    .orderByChild("createdDate");
+        else
+            postsQuery = databaseReference
+                    .limitToLast(Constants.Post.POST_AMOUNT_ON_PAGE)
+                    .endAt(date)
+                    .orderByChild("createdDate");
 
         postsQuery.keepSynced(true);
         postsQuery.addListenerForSingleValueEvent(new ValueEventListener() {

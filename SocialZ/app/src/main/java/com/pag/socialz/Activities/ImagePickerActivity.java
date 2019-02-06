@@ -92,8 +92,7 @@ public abstract class ImagePickerActivity extends BaseActivity{
     }
 
     public void onSelectImageClick(View view){
-        if (CropImage.isExplicitCameraPermissionRequired(this)) requestPermissions(new String[]{Manifest.permission.CAMERA}, CropImage.CAMERA_CAPTURE_PERMISSIONS_REQUEST_CODE);
-         else CropImage.startPickImageActivity(this);
+        CropImage.startPickImageActivity(this);
     }
 
     protected void loadImageToImageView(){
